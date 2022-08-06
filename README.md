@@ -248,6 +248,8 @@ Error: writing blob: uploading layer to https://aap-hub-01.example.com/v2/utc_ee
 
 # Push to quay
 ```
+# podman login -u="Albert2013" quay.io
+
 # podman tag localhost/utc_ee_image_02 quay.io/albert2013/utc_ee_image_02
 
 # podman push quay.io/albert2013/utc_ee_image_02:latest
