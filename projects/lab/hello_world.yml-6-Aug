@@ -1,0 +1,83 @@
+- name: Hello World Sample
+  hosts: all
+  vars:
+    app_ip: 192.168.122.31
+    user_id: 1
+    job_template_id: 9
+
+    schedule_only: true
+    execute: false
+
+  tasks:
+
+  - name: schdule
+    block:
+    - name: retrieve the Ansible Tower Token
+      uri:
+        url: https://{{ app_ip }}/api/v2/users/{{ user_id }}/personal_tokens/
+        user: admin
+        password: redhat
+        method: POST
+        force_basic_auth: yes
+        headers:
+          Content-Type: application/json
+        return_content: yes
+        validate_certs: no
+        status_code: [200, 201]
+        body_format: json
+        body:
+          extra_vars:
+            description: "Tower CLI"
+            application: null
+            scope: write
+      register: result
+
+    - set_fact:
+        token: "{{ result['json']['token'] }}"
+
+    - name: trigger the webhook notification tempalte
+      uri:
+        url: https://{{ app_ip }}/api/v2/job_templates/{{ job_template_id }}/schedules/
+        method: POST
+        headers:
+          Authorization: "Bearer {{ token }}" 
+        return_content: yes
+        validate_certs: no
+        status_code: [200, 201]
+        body_format: json
+        body:
+            rrule: "DTSTART;TZID=Asia/Singapore:20220806T161500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY"
+            name: "schdule-11"
+            description: ""
+            extra_data: 
+              report_file_for_schedule: "{{ report_file }}"
+              schedule_only: false
+              execute: true
+            inventory: null
+            scm_branch: ""
+            job_type: null
+            job_tags: ""
+            skip_tags: ""
+            limit: ""
+            diff_mode: null
+            verbosity: null
+            enabled: true
+            unified_job_template: 9
+            dtstart: "2022-08-06T08:15:00Z"
+            dtend: "2022-08-06T06:15:00Z"
+            next_run: null
+            timezone: "Asia/Singapore"
+            until: ""
+            report_file: "afdhafhasd"
+      register: result
+
+    when: schedule_only
+
+
+  - name: schdule
+    block:
+    - name: Hello Message
+      debug:
+        msg: "{{ report_file_for_schedule | default('Hello World!') }}"
+
+    when: execute

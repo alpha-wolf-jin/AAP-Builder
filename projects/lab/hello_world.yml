@@ -1,0 +1,13 @@
+- name: Hello World Sample
+  hosts: all
+  vars:
+
+  tasks:
+    - name: Report File
+      debug:
+        msg: "{{ report_file | default('Hello World!') }}"
+
+    - name: Schedule Name
+      debug:
+        msg: "{{ delete_schedule | default('Hello World!') }}"
+
