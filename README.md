@@ -135,18 +135,10 @@ bash-4.4# echo "Asia/Singapore" >  /etc/timezone
 ```
 
 
+# Create new iamge and directly make changes inside 
 
 ```
 # 
-#  ADD ENV TZ="Asia/Singapore"
-
-# vim context/Containerfile 
-FROM $EE_BUILDER_IMAGE as builder
-ADD _build/bindep.txt bindep.txt
-ENV TZ="Asia/Singapore"
-RUN ansible-builder introspect --sanitize --user-bindep=bindep.txt --write-bindep=/tmp/src/bindep.txt --write-pip=/tmp/src/requirements.txt
-RUN assemble
-
 # podman build -f context/Containerfile -t utc_ee_image_01 context
 
 # podman images
@@ -172,7 +164,10 @@ CONTAINER ID  IMAGE                                       COMMAND     CREATED   
 # podman images
 REPOSITORY                                TAG         IMAGE ID      CREATED         SIZE
 localhost/utc_ee_image_sgt                latest      6b3a2e33d792  20 seconds ago  994 MB
+```
 
+# Verify TZ and Python TZ convert code in new image
+```
 # podman run -it --name test-03 --entrypoint /bin/bash  localhost/utc_ee_image_sgt:latest
 bash-4.4# date
 Sat Aug  6 20:51:14 +08 2022
@@ -196,3 +191,22 @@ Type "help", "copyright", "credits" or "license" for more information.
 2022-08-06T06:50:00Z
 >>> exit()
 ```
+
+# Upload to AutoHub
+```
+# podman images
+REPOSITORY                                TAG         IMAGE ID      CREATED         SIZE
+localhost/utc_ee_image_sgt                latest      6b3a2e33d792  14 minutes ago  994 MB
+
+# podman tag  6b3a2e33d792 aap-hub-01.example.com/utc_ee_image_sgt:latest
+
+# podman login -u admin -p redhat aap-hub-01.example.com --tls-verify=false
+
+# podman push aap-hub-01.example.com/utc_ee_image_sgt:latest --tls-verify=false
+
+```
+
+Configure the new execution image pointing to the newly create customized image in autohub
+
+![Once Login Azure portal](images/aap-api-03.png)
+
