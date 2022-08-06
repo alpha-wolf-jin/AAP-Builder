@@ -72,5 +72,8 @@ aap-hub-01.example.com/utc_ee_image       latest      f5bb2d1bd3ab  11 minutes a
 
 ```
 
-### Click the resouce group `openenv-g96kt`
+### Click the resouce group `Execution Environment` under `Administration`
+
+Configure the new execution image pointing to the newly create customized image in autohub
+
 ![Once Login Azure portal](images/aap-api-01.png)
