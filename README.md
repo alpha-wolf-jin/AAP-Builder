@@ -138,32 +138,21 @@ bash-4.4# echo "Asia/Singapore" >  /etc/timezone
 # Create new iamge and directly make changes inside 
 
 ```
-# 
-# podman build -f context/Containerfile -t utc_ee_image_01 context
 
-# podman images
-REPOSITORY                                TAG         IMAGE ID      CREATED        SIZE
-<none>                                    <none>      dec8498a52e9  2 minutes ago  988 MB
-localhost/utc_ee_image_01                 latest      f5bb2d1bd3ab  2 hours ago    994 MB
-
-# podman run -it --name test-02 --entrypoint /bin/bash  localhost/utc_ee_image_01:latest
-bash-4.4# date
-Sat Aug  6 12:44:18 UTC 2022
+# podman run -it --name test-01 --entrypoint /bin/bash  aap-hub-01.example.com/utc_ee_image:latest
 bash-4.4# cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime
 bash-4.4# echo "Asia/Singapore" >  /etc/timezone
 bash-4.4# date
-Sat Aug  6 20:45:25 +08 2022
-bash-4.4# 
+Sat Aug  6 21:51:26 +08 2022
 bash-4.4# exit
-# podman ps -a
-CONTAINER ID  IMAGE                                       COMMAND     CREATED            STATUS                     PORTS       NAMES
-2384bea4ebb9  aap-hub-01.example.com/utc_ee_image:latest              About an hour ago  Exited (0) 15 minutes ago              test-01
-32f5d258cd8f  localhost/utc_ee_image_01:latest                        4 minutes ago      Exited (0) 26 seconds ago              test-02
-[root@aap-ctrl-01 lab]# 
-# podman commit 32f5d258cd8f utc_ee_image_sgt
+exit
+
+# podman commit 9874093d9b4f aap-hub-01.example.com/utc_ee_image_sgt:latest
+
 # podman images
-REPOSITORY                                TAG         IMAGE ID      CREATED         SIZE
-localhost/utc_ee_image_sgt                latest      6b3a2e33d792  20 seconds ago  994 MB
+REPOSITORY                                TAG         IMAGE ID      CREATED             SIZE
+aap-hub-01.example.com/utc_ee_image_sgt   latest      5e8f4f307baa  About a minute ago  994 MB
+
 ```
 
 # Verify TZ and Python TZ convert code in new image
@@ -210,3 +199,82 @@ Configure the new execution image pointing to the newly create customized image 
 
 ![Once Login Azure portal](images/aap-api-03.png)
 
+# Direct Modify Image failed with below error
+```
+/usr/local/bin/ansible-playbook: ansible-playbook: line 22: syntax error near unexpected token `('
+/usr/local/bin/ansible-playbook: ansible-playbook: line 22: `from __future__ import (absolute_import, division, print_function)'
+```
+
+# Solution
+
+**The `context/Containerfile` file was created when using ansible-builder to install tzdata rpm**
+
+>Add TZ Conf
+```
+...
+ENV TZ="Asia/Singapore"
+...&& cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime && echo "Asia/Singapore" >  /etc/timezone
+```
+ 
+```
+# vim context/Containerfile
+...
+FROM $EE_BASE_IMAGE
+USER root
+ENV TZ="Asia/Singapore"
+COPY --from=builder /output/ /output/
+RUN /output/install-from-bindep && rm -rf /output/wheels  && cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime && echo "Asia/Singapore" >  /etc/timezone
+
+# podman build -f context/Containerfile -t utc_ee_image_02 context
+
+```
+# Test
+```
+# podman run -it --name test-03 --entrypoint /bin/bash  localhost/utc_ee_image_02:latest
+bash-4.4# date
+Sat Aug  6 22:52:19 +08 2022
+bash-4.4# exit
+exit
+[root@aap-ctrl-01 lab]# podman images
+REPOSITORY                                TAG         IMAGE ID      CREATED         SIZE
+localhost/utc_ee_image_02                 latest      e475a8f5a193  57 seconds ago  994 MB
+```
+
+# Push AutoHub with err 500 
+```
+Error: writing blob: uploading layer to https://aap-hub-01.example.com/v2/utc_ee_image_02/blobs/uploads/ac651413-e45b-4d20-8e4b-88d46c7ccf88?digest=sha256%3Af0a2109a2528cd1cf5eaa3f5867a6771e4a7c28ae7179d7cc67cbcc2b29f21fc: received unexpected HTTP status: 500 Internal Server Error
+
+```
+
+# Push to quay
+```
+# podman tag localhost/utc_ee_image_02 quay.io/albert2013/utc_ee_image_02
+
+# podman push quay.io/albert2013/utc_ee_image_02:latest
+
+```
+
+### Click the resouce group `Execution Environment` under `Administration`
+
+Configure the new Credentail for quay registry
+
+![Once Login Azure portal](images/aap-api-04.png)
+
+Updated the new execution image setting
+
+![Once Login Azure portal](images/aap-api-05.png)
+
+
+```
+PLAY [localhost] ***************************************************************
+TASK [debug] *******************************************************************
+ok: [localhost] => {
+    "msg": "2022-08-06T16:00:00"
+}
+TASK [pure python code] ********************************************************
+changed: [localhost]
+TASK [debug] *******************************************************************
+ok: [localhost] => {
+    "msg": "2022-08-06T08:00:00Z"
+}
+```
