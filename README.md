@@ -77,3 +77,7 @@ aap-hub-01.example.com/utc_ee_image       latest      f5bb2d1bd3ab  11 minutes a
 Configure the new execution image pointing to the newly create customized image in autohub
 
 ![Once Login Azure portal](images/aap-api-01.png)
+
+Configure the new execution for tempalte `scheduler`
+
+![Once Login Azure portal](images/aap-api-02.png)
