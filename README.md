@@ -270,7 +270,7 @@ quay.io/albert2013/utc_ee_image_02   latest      3597adc6226c  6 minutes ago  99
 ```
 
 
-# Confirm TZ of iamge is Singapore 
+# Confirm TZ of image is Singapore 
 ```
 # podman run -it --name test-03 --entrypoint /bin/bash  localhost/utc_ee_image_02:latest
 bash-4.4# date
