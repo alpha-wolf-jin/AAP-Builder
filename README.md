@@ -237,6 +237,7 @@ additional_build_steps:
 # cat bindep.txt
 tzdata [platform:rpm]
 
+# > ./ansible.cfg
 # cat ansible.cfg
 #
 
