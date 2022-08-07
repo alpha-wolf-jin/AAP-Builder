@@ -1,0 +1,12 @@
+version: 1
+
+ansible_config: 'ansible.cfg' 
+
+dependencies: 
+  system: bindep.txt
+
+additional_build_steps: 
+  prepend: |
+    RUN cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime && echo "Asia/Singapore" >  /etc/timezone
+
+

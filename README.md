@@ -205,29 +205,58 @@ Configure the new execution image pointing to the newly create customized image 
 /usr/local/bin/ansible-playbook: ansible-playbook: line 22: `from __future__ import (absolute_import, division, print_function)'
 ```
 
-# Solution
+# Solution 01
 
-**The `context/Containerfile` file was created when using ansible-builder to install tzdata rpm**
+```
+# cat execution-environment.yml 
+version: 1
 
->Add TZ Conf
-```
-...
-ENV TZ="Asia/Singapore"
-...&& cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime && echo "Asia/Singapore" >  /etc/timezone
-```
- 
-```
-# vim context/Containerfile
+
+ansible_config: 'ansible.cfg' 
+
+dependencies: 
+  system: bindep.txt
+
+additional_build_steps: 
+  prepend: |
+    RUN cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime && echo "Asia/Singapore" >  /etc/timezone
+
+
+# cat bindep.txt
+tzdata [platform:rpm]
+
+# cat ansible.cfg
+#
+
+# podman login registry.redhat.io
+
+# ansible-builder build -t utc_ee_image_03
+Running command:
+  podman build -f context/Containerfile -t utc_ee_image_03 context
+Complete! The build context can be found at: /root/builder/context
+
+# cat /root/builder/context/Containerfile 
 ...
 FROM $EE_BASE_IMAGE
 USER root
-ENV TZ="Asia/Singapore"
+RUN cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime && echo "Asia/Singapore" >  /etc/timezone
 COPY --from=builder /output/ /output/
-RUN /output/install-from-bindep && rm -rf /output/wheels  && cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime && echo "Asia/Singapore" >  /etc/timezone
+RUN /output/install-from-bindep && rm -rf /output/wheels
 
-# podman build -f context/Containerfile -t utc_ee_image_02 context
+# podman login -u="Albert2013" quay.io
+
+# podman tag localhost/utc_ee_image_sgt:latest quay.io/albert2013/utc_ee_image_02:latest
+
+# podman push quay.io/albert2013/utc_ee_image_02:latest
+
+# podman images
+REPOSITORY                           TAG         IMAGE ID      CREATED        SIZE
+localhost/utc_ee_image_02            latest      3597adc6226c  6 minutes ago  994 MB
+quay.io/albert2013/utc_ee_image_02   latest      3597adc6226c  6 minutes ago  994 MB
 
 ```
+
+
 # Test
 ```
 # podman run -it --name test-03 --entrypoint /bin/bash  localhost/utc_ee_image_02:latest
