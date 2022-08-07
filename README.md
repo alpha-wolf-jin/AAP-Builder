@@ -252,7 +252,7 @@ Complete! The build context can be found at: /root/builder/context
 ...
 FROM $EE_BASE_IMAGE
 USER root
-RUN cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime && echo "Asia/Singapore" >  /etc/timezone
+RUN cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime && echo "Asia/Singapore" >/etc/timezone
 COPY --from=builder /output/ /output/
 RUN /output/install-from-bindep && rm -rf /output/wheels
 
