@@ -12,6 +12,16 @@ git push -u origin main
 
 git add . ; git commit -a -m "update README" ; git push -u origin main
 ```
+# BackGroud
+
+There is REST API needs SGT and UTC time as input.
+
+The playbook works well when it runs on the local VM, but failed on execution container.
+
+After troubleshooting, the root causes are found:
+- missing rpm `tzdata` in the image
+- the timezone in image is UTC instead of SGT as the VM 
+
 
 https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.1/html-single/ansible_builder_guide/index
 
@@ -271,6 +281,12 @@ localhost/utc_ee_image_02                 latest      e475a8f5a193  57 seconds a
 
 # Push AutoHub with err 500 
 ```
+# podman login -u=admin -p=redhat aap-hub-01.example.com --tls-verify=false
+
+# podman tag localhost/utc_ee_image_02:latest aap-hub-01.example.com/utc_ee_image_02:latest
+
+# podman push aap-hub-01.example.com/utc_ee_image_02:latest  --tls-verify=false
+
 Error: writing blob: uploading layer to https://aap-hub-01.example.com/v2/utc_ee_image_02/blobs/uploads/ac651413-e45b-4d20-8e4b-88d46c7ccf88?digest=sha256%3Af0a2109a2528cd1cf5eaa3f5867a6771e4a7c28ae7179d7cc67cbcc2b29f21fc: received unexpected HTTP status: 500 Internal Server Error
 
 ```
