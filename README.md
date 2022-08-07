@@ -245,7 +245,7 @@ tzdata [platform:rpm]
 
 # ansible-builder build -t utc_ee_image_02
 Running command:
-  podman build -f context/Containerfile -t utc_ee_image_03 context
+  podman build -f context/Containerfile -t utc_ee_image_02 context
 Complete! The build context can be found at: /root/builder/context
 
 # cat /root/builder/context/Containerfile 
