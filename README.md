@@ -231,7 +231,7 @@ dependencies:
 
 additional_build_steps: 
   prepend: |
-    RUN cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime && echo "Asia/Singapore" >  /etc/timezone
+    RUN cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime && echo "Asia/Singapore" >/etc/timezone
 
 
 # cat bindep.txt
