@@ -22,6 +22,8 @@ After troubleshooting, the root causes are found:
 - missing rpm `tzdata` in the image
 - the timezone in image is UTC instead of SGT as the VM 
 
+This doc is about the troubleshoot & solution detection.
+
 
 https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.1/html-single/ansible_builder_guide/index
 
