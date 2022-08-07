@@ -243,7 +243,7 @@ tzdata [platform:rpm]
 
 # podman login registry.redhat.io
 
-# ansible-builder build -t utc_ee_image_03
+# ansible-builder build -t utc_ee_image_02
 Running command:
   podman build -f context/Containerfile -t utc_ee_image_03 context
 Complete! The build context can be found at: /root/builder/context
@@ -270,7 +270,7 @@ quay.io/albert2013/utc_ee_image_02   latest      3597adc6226c  6 minutes ago  99
 ```
 
 
-# Test
+# Confirm TZ of iamge is Singapore 
 ```
 # podman run -it --name test-03 --entrypoint /bin/bash  localhost/utc_ee_image_02:latest
 bash-4.4# date
