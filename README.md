@@ -451,7 +451,7 @@ bash-4.4# exit
 exit
 ```
 
-**Conteanerfile**
+**Containerfile**
 
 From above command output, you can see 'ansible-bulder' triggers 'podman`
 ```
