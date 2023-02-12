@@ -369,3 +369,51 @@ The comand 'ansible-builder' will create directory 'context'. The 'Containerfile
 
 So we need to mv the 'projects' to 'context' which 'Containerfile' file stay.
 
+```
+[root@aap-ctrl-01 AAP-Builder-TroubleShoot]# mv projects context
+[root@aap-ctrl-01 AAP-Builder-TroubleShoot]# tree
+.
+├── 02-execution-environment.yml
+├── ansible.cfg
+├── bindep.txt
+├── context
+│   ├── _build
+│   │   ├── ansible.cfg
+│   │   └── bindep.txt
+│   ├── Containerfile
+│   └── projects
+│       └── lab
+│           ├── hello_world.yml
+│           ├── hello_world.yml-6-Aug
+│           ├── scheduler.yaml
+│           ├── scheduler.yaml-bkp
+│           └── tz.py
+├── execution-environment.yml
+├── images
+│   ├── aap-api-01.png
+│   ├── aap-api-02.png
+│   ├── aap-api-03.png
+│   ├── aap-api-04.png
+│   └── aap-api-05.png
+└── README.md
+
+5 directories, 18 files
+
+```
+
+Create `execution-environment.yml` file
+```
+# cat 02-execution-environment.yml 
+---
+version: 1
+
+build_arg_defaults:
+  EE_BASE_IMAGE: 'registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8@sha256:077a473b92818e166a98671f15e280b1516c10d425a9980a3dad73cebb14fc55'
+
+ansible_config: 'ansible.cfg'
+
+additional_build_steps:
+    prepend:
+        - RUN mkdir -p /var/lib/awx/projects
+        - ADD projects/ /var/lib/awx/projects
+```
