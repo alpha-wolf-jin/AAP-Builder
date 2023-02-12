@@ -1,23 +1,20 @@
-ARG EE_BASE_IMAGE=quay.io/ansible/ansible-runner:latest
+ARG EE_BASE_IMAGE=registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8@sha256:077a473b92818e166a98671f15e280b1516c10d425a9980a3dad73cebb14fc55
 ARG EE_BUILDER_IMAGE=quay.io/ansible/ansible-builder:latest
 
 FROM $EE_BASE_IMAGE as galaxy
 ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS=
+ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS=
 USER root
 
 ADD _build/ansible.cfg ~/.ansible.cfg
 
-ADD _build /build
-WORKDIR /build
-
 
 FROM $EE_BUILDER_IMAGE as builder
-ADD _build/bindep.txt bindep.txt
-RUN ansible-builder introspect --sanitize --user-bindep=bindep.txt --write-bindep=/tmp/src/bindep.txt --write-pip=/tmp/src/requirements.txt
-RUN assemble
 
 FROM $EE_BASE_IMAGE
 USER root
-RUN cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime && echo "Asia/Singapore" >  /etc/timezone
+RUN mkdir -p /var/lib/awx/projects
+ADD projects/ /var/lib/awx/projects
 COPY --from=builder /output/ /output/
 RUN /output/install-from-bindep && rm -rf /output/wheels
+LABEL ansible-execution-environment=true

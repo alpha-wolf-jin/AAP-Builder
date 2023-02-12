@@ -367,7 +367,7 @@ We copy the contents inder dircotry 'projects' to the directory '/var/lib/awx/pr
 
 The comand 'ansible-builder' will create directory 'context'. The 'Containerfile' file will be under 'context', which is used for 'podman build...'.
 
-So we need to mv the 'projects' to 'context' which 'Containerfile' file stay.
+**Move the 'projects' to 'context' which 'Containerfile' file stay.**
 
 ```
 [root@aap-ctrl-01 AAP-Builder-TroubleShoot]# mv projects context
@@ -401,7 +401,7 @@ So we need to mv the 'projects' to 'context' which 'Containerfile' file stay.
 
 ```
 
-Create `execution-environment.yml` file
+**Create `execution-environment.yml` file**
 ```
 # cat 02-execution-environment.yml 
 ---
@@ -416,4 +416,70 @@ additional_build_steps:
     prepend:
         - RUN mkdir -p /var/lib/awx/projects
         - ADD projects/ /var/lib/awx/projects
+```
+
+**Build Image**
+```
+# podman login registry.redhat.io
+Authenticating with existing credentials for registry.redhat.io
+Existing credentials are valid. Already logged in to registry.redhat.io
+
+
+# ansible-builder build -f 02-execution-environment.yml -t singtel_ee_01 -v 3
+Ansible Builder is building your execution environment image. Tags: singtel_ee_01
+File context/_build/ansible.cfg is already up-to-date.
+Rewriting Containerfile to capture collection requirements
+Running command:
+  podman build -f context/Containerfile -t singtel_ee_01 context
+[1/3] STEP 1/5: FROM registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8@sha256:077a473b92818e166a98671f15e280b1516c10d425a9980a3dad73cebb14fc55 AS galaxy
+[1/3] STEP 2/5: ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS=
+--> Using cache 65d8f548f63774fd7b9c83a815488d88067bf685d41e19969d3b04270ae1f452
+...
+
+[root@aap-ctrl-01 AAP-Builder-TroubleShoot]# podman images
+REPOSITORY                                                            TAG         IMAGE ID      CREATED         SIZE
+localhost/singtel_ee_01                                               latest      fd83c1c2880d  29 seconds ago  1.7 GB
+
+```
+
+**Verification**
+```
+# podman run -it --name test-03 --entrypoint /bin/bash localhost/singtel_ee_01:latest
+bash-4.4# ls /var/lib/awx/projects/lab/
+hello_world.yml  hello_world.yml-6-Aug	scheduler.yaml	scheduler.yaml-bkp  tz.py
+bash-4.4# exit
+exit
+```
+
+**Conteanerfile**
+
+From above command output, you can see 'ansible-bulder' triggers 'podman`
+```
+Running command:
+  podman build -f context/Containerfile -t singtel_ee_01 context
+```
+
+```
+# cat context/Containerfile 
+ARG EE_BASE_IMAGE=registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8@sha256:077a473b92818e166a98671f15e280b1516c10d425a9980a3dad73cebb14fc55
+ARG EE_BUILDER_IMAGE=quay.io/ansible/ansible-builder:latest
+
+FROM $EE_BASE_IMAGE as galaxy
+ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS=
+ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS=
+USER root
+
+ADD _build/ansible.cfg ~/.ansible.cfg
+
+
+FROM $EE_BUILDER_IMAGE as builder
+
+FROM $EE_BASE_IMAGE
+USER root
+RUN mkdir -p /var/lib/awx/projects
+ADD projects/ /var/lib/awx/projects
+COPY --from=builder /output/ /output/
+RUN /output/install-from-bindep && rm -rf /output/wheels
+LABEL ansible-execution-environment=true
+
 ```
