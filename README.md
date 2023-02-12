@@ -328,3 +328,44 @@ ok: [localhost] => {
     "msg": "UTC Time: 2022-08-06T08:00:00Z"
 }
 ```
+
+# Add dirctory to the image
+
+We copy the contents inder dircotry 'projects' to the directory '/var/lib/awx/projects' in the image
+
+**Directory Structure**
+```
+# tree
+.
+├── 02-execution-environment.yml
+├── ansible.cfg
+├── bindep.txt
+├── context
+│   ├── _build
+│   │   ├── ansible.cfg
+│   │   └── bindep.txt
+│   └── Containerfile
+├── execution-environment.yml
+├── images
+│   ├── aap-api-01.png
+│   ├── aap-api-02.png
+│   ├── aap-api-03.png
+│   ├── aap-api-04.png
+│   └── aap-api-05.png
+├── projects
+│   └── lab
+│       ├── hello_world.yml
+│       ├── hello_world.yml-6-Aug
+│       ├── scheduler.yaml
+│       ├── scheduler.yaml-bkp
+│       └── tz.py
+└── README.md
+
+5 directories, 18 files
+
+```
+
+The comand 'ansible-builder' will create directory 'context'. The 'Containerfile' file will be under 'context', which is used for 'podman build...'.
+
+So we need to mv the 'projects' to 'context' which 'Containerfile' file stay.
+

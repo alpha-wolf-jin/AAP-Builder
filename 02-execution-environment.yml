@@ -1,0 +1,12 @@
+---
+version: 1
+
+build_arg_defaults:
+  EE_BASE_IMAGE: 'registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8@sha256:077a473b92818e166a98671f15e280b1516c10d425a9980a3dad73cebb14fc55'
+
+ansible_config: 'ansible.cfg'
+
+additional_build_steps:
+    prepend:
+        - RUN mkdir -p /var/lib/awx/projects
+        - ADD projects/ /var/lib/awx/projects
