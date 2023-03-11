@@ -145,7 +145,27 @@ bash-4.4# cp /usr/share/zoneinfo/Asia/Singapore /etc/localtime
 bash-4.4# echo "Asia/Singapore" >  /etc/timezone
 
 ```
+**Note**
+How to access the down container?
+```
+# podman ps -a
+CONTAINER ID  IMAGE                                                                 COMMAND     CREATED      STATUS                    PORTS       NAMES
+686af17e02e5  localhost/singtel_ee_02:latest                                                    3 weeks ago  Exited (0) 3 weeks ago                test-02
+c7ec598ba9c7  localhost/singtel_ee_01:latest                                                    3 weeks ago  Exited (0) 3 weeks ago                test-03
+5ba395a08708  localhost/singtel_ee_02:latest                                                    2 weeks ago  Exited (130) 2 weeks ago              test-04
+34cf2f37d1a5  registry.redhat.io/ansible-automation-platform-21/ee-29-rhel8:latest              2 weeks ago  Exited (0) 2 weeks ago                test-ee-29
+228001a9284d  localhost/singtel_ee_02:latest                                                    2 weeks ago  Exited (0) 2 weeks ago                test-05
+[root@aap-ctrl-01 AAP-Builder-TroubleShoot]# podman start -a -i test-ee-29
+bash-4.4# 
 
+```
+
+
+
+```
+# podman run -it --name test-ee-29 --entrypoint /bin/bash registry.redhat.io/ansible-automation-platform-21/ee-29-rhel8:latest 
+
+```
 
 # Create new iamge and directly make changes inside 
 
